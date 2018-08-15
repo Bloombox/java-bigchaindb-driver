@@ -22,7 +22,6 @@ public class Asset implements Serializable {
 
 	/** The id. */
 	@SerializedName("id")
-	@Exclude
 	private String id;
 	
 	/** The data. */
