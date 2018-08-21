@@ -383,9 +383,12 @@ public class BigchainDbTransactionBuilder {
 
                 // it's a transfer operation: make sure to update the hash pre-image with
                 // the fulfilling transaction IDs and output indexes
-                for (Output out : this.transaction.getOutputs()) {
-                    String txBlock = out.getTransactionId() + String.valueOf(out.getOutputIndex());
-                    preimage.append(txBlock);
+                for (Input in : this.transaction.getInputs()) {
+                    if (in.getFulFills() != null) {
+                        FulFill fulfill = in.getFulFills();
+                        String txBlock = fulfill.getTransactionId() + String.valueOf(fulfill.getOutputIndex());
+                        preimage.append(txBlock);
+                    }
                 }
                 sha3Hash = DriverUtils.getSha3HashRaw(preimage.toString().getBytes());
             } else {
