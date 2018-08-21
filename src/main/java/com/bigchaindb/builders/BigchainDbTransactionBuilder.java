@@ -377,7 +377,20 @@ public class BigchainDbTransactionBuilder {
             log.debug("TO BE HASHED ---->\n" + temp + "\n<");
             JsonObject transactionJObject = DriverUtils.makeSelfSortingGson(temp);
 
-            byte[] sha3Hash = DriverUtils.getSha3HashRaw(transactionJObject.toString().getBytes());
+            byte[] sha3Hash;
+            if (Operations.TRANSFER.name().equals(this.transaction.getOperation())) {
+                StringBuilder preimage = new StringBuilder(transactionJObject.toString());
+
+                // it's a transfer operation: make sure to update the hash pre-image with
+                // the fulfilling transaction IDs and output indexes
+                for (Output out : this.transaction.getOutputs()) {
+                    String txBlock = out.getTransactionId() + String.valueOf(out.getOutputIndex());
+                    preimage.append(txBlock);
+                }
+                sha3Hash = DriverUtils.getSha3HashRaw(preimage.toString().getBytes());
+            } else {
+                sha3Hash = DriverUtils.getSha3HashRaw(transactionJObject.toString().getBytes());
+            }
 
             // signing the transaction
             Signature edDsaSigner = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
