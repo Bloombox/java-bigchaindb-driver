@@ -35,6 +35,7 @@ public class JsonUtils {
 
     private static Map<String, TypeAdapter> typeAdaptersSerialize = new ConcurrentHashMap<String, TypeAdapter>(16) {{
         put(Asset.class.getCanonicalName(), new TypeAdapter(Asset.class, new AssetSerializer()));
+        put(Input.class.getCanonicalName(), new TypeAdapter(Input.class, new InputSerializer()));
         put(MetaData.class.getCanonicalName(), new TypeAdapter(MetaData.class, new MetaDataSerializer()));
     }};
 
@@ -70,8 +71,8 @@ public class JsonUtils {
 
     /**
      * returns gson
-     * @param exclusionStrategies
-     * @return
+     * @param exclusionStrategies strategy to use
+     * @return gson
      */
     public static Gson getGson(ExclusionStrategy... exclusionStrategies) {
         return getGson(null, exclusionStrategies);
@@ -79,9 +80,9 @@ public class JsonUtils {
 
     /**
      * returns gson
-     * @param ignoreClass
-     * @param exclusionStrategies
-     * @return
+     * @param ignoreClass class to ignore
+     * @param exclusionStrategies strategy to use
+     * @return gson
      */
     public static Gson getGson(Class ignoreClass, ExclusionStrategy... exclusionStrategies) {
         GsonBuilder builder = base();

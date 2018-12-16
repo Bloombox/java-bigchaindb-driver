@@ -30,13 +30,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+
 /**
- * The Class BigchaindbTransactionTest.
+ * The Class TransactionCreateApiTest.
  */
-public class TransactionApiTest extends AbstractApiTest {
+public class TransactionCreateApiTest extends AbstractApiTest {
 
     public static String TRANSACTION_ID = "4957744b3ac54434b8270f2c854cc1040228c82ea4e72d66d2887a4d3e30b317";
     public static String V1_GET_TRANSACTION_JSON = "{\n" +
@@ -265,7 +267,7 @@ public class TransactionApiTest extends AbstractApiTest {
      * @throws InvalidKeySpecException
      */
     @Test
-    public void testBuildTransaction() {
+    public void testBuildCreateTransaction() {
         try {
             Map<String, String> assetData = new TreeMap<String, String>() {{
                 put("msg", "Hello BigchainDB!");
@@ -289,6 +291,7 @@ public class TransactionApiTest extends AbstractApiTest {
             assertTrue(transaction.getVersion().equals("2.0"));
             assertTrue(transaction.getAsset().getData() != null);
             assertTrue(transaction.getSigned());
+            assertEquals(transaction.getOperation(), "CREATE");
 
             Input input = transaction.getInputs().get(0);
             assertTrue(input.getOwnersBefore() != null);
@@ -315,7 +318,7 @@ public class TransactionApiTest extends AbstractApiTest {
      * @throws InvalidKeySpecException
      */
     @Test
-    public void testBuildOnlyTransaction() {
+    public void testBuildOnlyCreateTransaction() {
         try {
             Map<String, String> assetData = new TreeMap<String, String>() {{
                 put("msg", "Hello BigchainDB!");
@@ -323,7 +326,7 @@ public class TransactionApiTest extends AbstractApiTest {
 
             EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) Account.publicKeyFromHex(publicKey);
             FulFill fulFill = new FulFill();
-            fulFill.setOutputIndex("0");
+            fulFill.setOutputIndex(0);
             fulFill.setTransactionId("2d431073e1477f3073a4693ac7ff9be5634751de1b8abaa1f4e19548ef0b4b0e");
 
             Transaction transaction = BigchainDbTransactionBuilder
@@ -336,12 +339,13 @@ public class TransactionApiTest extends AbstractApiTest {
 
             assertTrue(transaction.getVersion().equals("2.0"));
             assertTrue(transaction.getSigned() == null);
+            assertEquals(transaction.getOperation(), "CREATE");
 
             Input input = transaction.getInputs().get(0);
             assertTrue(input.getOwnersBefore() != null);
             assertTrue(input.getFullFillment() != null);
             assertTrue(input.getFulFills() != null);
-            assertTrue(input.getFulFills().getOutputIndex().equals("0"));
+            assertTrue(input.getFulFills().getOutputIndex().equals(0));
             assertTrue(input.getFulFills().getTransactionId().equals("2d431073e1477f3073a4693ac7ff9be5634751de1b8abaa1f4e19548ef0b4b0e"));
 
             Output output = transaction.getOutputs().get(0);
@@ -357,7 +361,7 @@ public class TransactionApiTest extends AbstractApiTest {
     }
 
     @Test
-    public void testPostTransactionOfObjectUsingBuilder() {
+    public void testPostTransactionOfCreateUsingBuilder() throws Exception {
         net.i2p.crypto.eddsa.KeyPairGenerator edDsaKpg = new net.i2p.crypto.eddsa.KeyPairGenerator();
         KeyPair keyPair = edDsaKpg.generateKeyPair();
         try {
@@ -375,6 +379,7 @@ public class TransactionApiTest extends AbstractApiTest {
                     .buildAndSign((EdDSAPublicKey) keyPair.getPublic(), (EdDSAPrivateKey) keyPair.getPrivate())
                     .sendTransaction();
             assertNotNull(transaction.getId());
+            assertEquals(transaction.getOperation(), "CREATE");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -382,9 +387,10 @@ public class TransactionApiTest extends AbstractApiTest {
 
     /**
      * Test post transaction using builder with call back.
+     * @throws Exception 
      */
     @Test
-    public void testPostTransactionUsingBuilderWithCallBack() {
+    public void testPostCreateTransactionUsingBuilderWithCallBack() throws Exception {
         net.i2p.crypto.eddsa.KeyPairGenerator edDsaKpg = new net.i2p.crypto.eddsa.KeyPairGenerator();
         KeyPair keyPair = edDsaKpg.generateKeyPair();
         try {
@@ -425,7 +431,7 @@ public class TransactionApiTest extends AbstractApiTest {
     }
 
     @Test
-    public void testPostTransactionOfObjectMetaDataUsingBuilder() {
+    public void testPostCreateTransactionOfObjectMetaDataUsingBuilder() throws Exception {
         net.i2p.crypto.eddsa.KeyPairGenerator edDsaKpg = new net.i2p.crypto.eddsa.KeyPairGenerator();
         KeyPair keyPair = edDsaKpg.generateKeyPair();
         try {
@@ -444,6 +450,7 @@ public class TransactionApiTest extends AbstractApiTest {
                     .buildAndSign((EdDSAPublicKey) keyPair.getPublic(), (EdDSAPrivateKey) keyPair.getPrivate())
                     .sendTransaction();
             assertNotNull(transaction.getId());
+            assertEquals(transaction.getOperation(), "CREATE");
 
             String jsonString = JsonUtils.toJson(transaction);
             TransactionsDeserializer.setMetaDataClass(SomeMetaData.class);

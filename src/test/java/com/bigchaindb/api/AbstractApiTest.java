@@ -7,9 +7,9 @@ package com.bigchaindb.api;
 
 import com.bigchaindb.AbstractTest;
 import com.bigchaindb.builders.BigchainDbConfigBuilder;
-import com.bigchaindb.model.Account;
 import com.bigchaindb.model.ApiEndpoints;
 import com.bigchaindb.model.BigChainDBGlobals;
+import com.bigchaindb.model.Connection;
 import com.bigchaindb.util.JsonUtils;
 import com.bigchaindb.ws.MessageHandler;
 
@@ -24,10 +24,16 @@ import static com.bigchaindb.api.BlocksApiTest.V1_BLOCK_JSON;
 import static com.bigchaindb.api.MetaDataApiTest.V1_METADATA_JSON;
 import static com.bigchaindb.api.MetaDataApiTest.V1_METADATA_LIMIT_JSON;
 import static com.bigchaindb.api.OutputsApiTest.*;
-import static com.bigchaindb.api.TransactionApiTest.*;
+import static com.bigchaindb.api.TransactionCreateApiTest.*;
 import static com.bigchaindb.api.ValidatorsApiTest.V1_VALIDATORS_JSON;
 import static net.jadler.Jadler.*;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 public class AbstractApiTest extends AbstractTest {
 
@@ -43,9 +49,10 @@ public class AbstractApiTest extends AbstractTest {
 
     /**
      * Inits the.
+     * @throws TimeoutException 
      */
     @BeforeClass
-    public static void init() {
+    public static void init() throws TimeoutException {
         initJadler();
         onRequest()
                 .havingMethodEqualTo("GET")
@@ -146,17 +153,27 @@ public class AbstractApiTest extends AbstractTest {
                 .withBody(V1_POST_TRANSACTION_JSON)
                 .withStatus(200);
         JsonUtils.setJsonDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+ 
+        Map<String, Object> connConfig = new HashMap<String, Object>();
+        List<Connection> connections = new ArrayList<Connection>();
+        Map<String, String> headers = new HashMap<String, String>();
+        
+        //define headers
+        headers.put("app_id", "2bbaf3ff");
+        headers.put("app_key", "c929b708177dcc8b9d58180082029b8d");
+        
+        connConfig.put("baseUrl", "http://localhost:" + port());
+        connConfig.put("headers", headers);
+        Connection conn1 = new Connection(connConfig);
+        connections.add(conn1);
         BigchainDbConfigBuilder
-                .baseUrl("http://localhost:" + port())
-                .addToken("app_id", "2bbaf3ff")
-                .addToken("app_key", "c929b708177dcc8b9d58180082029b8d")
-                .webSocketMonitor(new MessageHandler() {
+        .addConnections(connections)
+        .webSocketMonitor(new MessageHandler() {
                     @Override
                     public void handleMessage(String message) {
                     }
                 })
-                .setup();
-
+        .setup();
     }
 
     @AfterClass
