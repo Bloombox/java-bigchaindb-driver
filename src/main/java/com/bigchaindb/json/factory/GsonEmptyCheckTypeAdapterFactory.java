@@ -45,7 +45,8 @@ public class GsonEmptyCheckTypeAdapterFactory implements TypeAdapterFactory {
 
         @Override
         public void write(final JsonWriter out, final T value) throws IOException {
-            this.delegate.write(out, value);
+            if (value != null)
+                this.delegate.write(out, value);
         }
 
         @Override
